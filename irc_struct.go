@@ -14,6 +14,7 @@ import (
 
 type Connection struct {
 	sync.WaitGroup
+	ID        int
 	Debug     bool
 	Error     chan error
 	Password  string
@@ -23,7 +24,7 @@ type Connection struct {
 	Timeout   time.Duration
 	PingFreq  time.Duration
 	KeepAlive time.Duration
-	Server      string
+	Server    string
 
 	socket net.Conn
 	pwrite chan string
