@@ -78,11 +78,11 @@ func (irc *Connection) readLoop() {
 			event := &Event{Raw: msg, Connection: irc}
 			var tagString string
 			tags := make(map[string]string)
-			if strings.HasPrefix(msg, "@") {
+			//todo mark a connection as IRCv3 or not, this is a bad solution
+			if strings.Contains(msg, "@color") {
 				tagString = strings.Split(msg, " ")[0]
 				msg = strings.Join(strings.Split(msg, " ")[1:], " ")
 				for _, t := range strings.Split(tagString, ";") {
-					fmt.Println("T: ", t)
 					tags[strings.Split(t, "=")[0]] = strings.Split(t, "=")[1]
 				}
 				event.Tags = tags

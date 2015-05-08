@@ -77,7 +77,6 @@ func (irc *Connection) ReplaceCallback(eventcode string, i string, callback func
 // Execute all callbacks associated with a given event.
 func (irc *Connection) RunCallbacks(event *Event) {
 	msg := event.Message()
-	fmt.Println()
 	if event.Code == "PRIVMSG" && len(msg) > 2 && msg[0] == '\x01' {
 		event.Code = "CTCP" //Unknown CTCP
 		if i := strings.LastIndex(msg, "\x01"); i > -1 {
