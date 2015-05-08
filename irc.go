@@ -32,7 +32,7 @@ import (
 )
 
 const (
-	VERSION = "go-ircevent v2.1"
+	VERSION = "go-ircevent v1337"
 )
 
 var ErrDisconnected = errors.New("Disconnect Called")
@@ -40,7 +40,7 @@ var ErrDisconnected = errors.New("Disconnect Called")
 // Read data from a connection. To be used as a goroutine.
 func (irc *Connection) readLoop() {
 	defer irc.Done()
-	br := bufio.NewReaderSize(irc.socket, 512)
+	br := bufio.NewReaderSize(irc.socket, 2048)
 
 	errChan := irc.ErrorChan()
 
