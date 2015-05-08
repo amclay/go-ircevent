@@ -53,6 +53,7 @@ type Event struct {
 	Source     string //<host>
 	User       string //<usr>
 	Arguments  []string
+	Tags       map[string]string
 	Connection *Connection
 }
 

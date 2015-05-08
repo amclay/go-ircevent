@@ -76,6 +76,17 @@ func (irc *Connection) readLoop() {
 			irc.lastMessage = time.Now()
 			msg = msg[:len(msg)-2] //Remove \r\n
 			event := &Event{Raw: msg, Connection: irc}
+			var tagString string
+			tags := make(map[string]string)
+			if strings.HasPrefix(msg, "@") {
+				tagString = strings.Split(msg, " ")[0]
+				msg = strings.Join(strings.Split(msg, " ")[1:], " ")
+				for _, t := range strings.Split(tagString, ";") {
+					fmt.Println("T: ", t)
+					tags[strings.Split(t, "=")[0]] = strings.Split(t, "=")[1]
+				}
+				event.Tags = tags
+			}
 			if msg[0] == ':' {
 				if i := strings.Index(msg, " "); i > -1 {
 					event.Source = msg[1:i]
@@ -404,7 +415,7 @@ func IRC(nick, user string) *Connection {
 		end:       make(chan struct{}),
 		Version:   VERSION,
 		KeepAlive: 4 * time.Minute,
-		Timeout:   1 * time.Minute,
+		Timeout:   5 * time.Minute,
 		PingFreq:  15 * time.Minute,
 	}
 	irc.setupCallbacks()
