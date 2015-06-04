@@ -32,7 +32,7 @@ import (
 )
 
 const (
-	VERSION = "go-ircevent v1337"
+	VERSION = "ircv3 v1"
 )
 
 var ErrDisconnected = errors.New("Disconnect Called")
@@ -41,9 +41,12 @@ var ErrDisconnected = errors.New("Disconnect Called")
 func (irc *Connection) readLoop() {
 	defer irc.Done()
 	br := bufio.NewReaderSize(irc.socket, 2048)
-
 	errChan := irc.ErrorChan()
-
+	defer func() {
+		if r := recover(); r != nil {
+			log.Println("Recovered in readloop", r)
+		}
+	}()
 	for {
 		select {
 		case <-irc.end:
@@ -57,16 +60,15 @@ func (irc *Connection) readLoop() {
 			}
 
 			msg, err := br.ReadString('\n')
+			if err != nil {
+				errChan <- err
+				break
+			}
 
 			// We got past our blocking read, so bin timeout
 			if irc.socket != nil {
 				var zero time.Time
 				irc.socket.SetReadDeadline(zero)
-			}
-
-			if err != nil {
-				errChan <- err
-				break
 			}
 
 			if irc.Debug {
@@ -80,12 +82,16 @@ func (irc *Connection) readLoop() {
 			tags := make(map[string]string)
 			//todo mark a connection as IRCv3 or not, this is a bad solution
 			if strings.Contains(msg, "@color") {
-				tagString = strings.Split(msg, " ")[0]
-				msg = strings.Join(strings.Split(msg, " ")[1:], " ")
-				for _, t := range strings.Split(tagString, ";") {
-					tags[strings.Split(t, "=")[0]] = strings.Split(t, "=")[1]
+				if strings.Count(msg, " ") >= 1 {
+					tagString = strings.Split(msg, " ")[0]
+					msg = strings.Join(strings.Split(msg, " ")[1:], " ")
+					for _, t := range strings.Split(tagString, ";") {
+						if strings.Count(t, "=") > 1 {
+							tags[strings.Split(t, "=")[0]] = strings.Split(t, "=")[1]
+						}
+					}
+					event.Tags = tags
 				}
-				event.Tags = tags
 			}
 			if msg[0] == ':' {
 				if i := strings.Index(msg, " "); i > -1 {
