@@ -44,7 +44,7 @@ func (irc *Connection) readLoop() {
 	errChan := irc.ErrorChan()
 	defer func() {
 		if r := recover(); r != nil {
-			log.Println("Recovered in readloop", r)
+			log.Println("RECOVERED IN READLOOP", r)
 		}
 	}()
 	for {
@@ -82,16 +82,18 @@ func (irc *Connection) readLoop() {
 			tags := make(map[string]string)
 			//todo mark a connection as IRCv3 or not, this is a bad solution
 			if strings.Contains(msg, "@color") {
-				if strings.Count(msg, " ") >= 1 {
-					tagString = strings.Split(msg, " ")[0]
-					msg = strings.Join(strings.Split(msg, " ")[1:], " ")
-					for _, t := range strings.Split(tagString, ";") {
-						if strings.Count(t, "=") > 1 {
-							tags[strings.Split(t, "=")[0]] = strings.Split(t, "=")[1]
-						}
-					}
-					event.Tags = tags
+				if strings.Count(msg, " ") <= 1 {
+					irc.Log.Printf("%s", "Count of spaces is not 1 or above")
 				}
+				tagString = strings.Split(msg, " ")[0]
+				msg = strings.Join(strings.Split(msg, " ")[1:], " ")
+				for _, t := range strings.Split(tagString, ";") {
+					if strings.Count(t, "=") >= 1 {
+						tags[strings.Split(t, "=")[0]] = strings.Split(t, "=")[1]
+					}
+				}
+				event.Tags = tags
+
 			}
 			if msg[0] == ':' {
 				if i := strings.Index(msg, " "); i > -1 {
