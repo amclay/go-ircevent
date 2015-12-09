@@ -389,7 +389,8 @@ func (irc *Connection) Connect(server string) error {
 		return err
 	}
 	irc.Log.Printf("Connected to %s (%s)\n", irc.Server, irc.socket.RemoteAddr())
-
+	irc.ID = lastID + 1
+	lastID++
 	irc.pwrite = make(chan string, 10)
 	irc.Error = make(chan error, 2)
 	irc.Add(3)
@@ -403,6 +404,8 @@ func (irc *Connection) Connect(server string) error {
 	irc.pwrite <- fmt.Sprintf("USER %s 0.0.0.0 0.0.0.0 :%s\r\n", irc.user, irc.user)
 	return nil
 }
+
+var lastID = 0
 
 // Create a connection with the (publicly visible) nickname and username.
 // The nickname is later used to address the user. Returns nil if nick
