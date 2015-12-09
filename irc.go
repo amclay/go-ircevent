@@ -346,7 +346,6 @@ func (irc *Connection) Reconnect() error {
 func (irc *Connection) Connect(server string) error {
 	irc.Server = server
 	irc.stopped = false
-
 	// make sure everything is ready for connection
 	if len(irc.Server) == 0 {
 		return errors.New("empty 'server'")
@@ -389,8 +388,6 @@ func (irc *Connection) Connect(server string) error {
 		return err
 	}
 	irc.Log.Printf("Connected to %s (%s)\n", irc.Server, irc.socket.RemoteAddr())
-	irc.ID = lastID + 1
-	lastID++
 	irc.pwrite = make(chan string, 10)
 	irc.Error = make(chan error, 2)
 	irc.Add(3)
@@ -420,6 +417,7 @@ func IRC(nick, user string) *Connection {
 	}
 
 	irc := &Connection{
+		ID:        lastID,
 		nick:      nick,
 		user:      user,
 		Log:       log.New(os.Stdout, "", log.LstdFlags),
@@ -429,6 +427,7 @@ func IRC(nick, user string) *Connection {
 		Timeout:   5 * time.Minute,
 		PingFreq:  15 * time.Minute,
 	}
+	lastID++
 	irc.setupCallbacks()
 	return irc
 }
