@@ -75,7 +75,7 @@ func (irc *Connection) readLoop() {
 				irc.Log.Printf("<-- %s\n", strings.TrimSpace(msg))
 			}
 
-			irc.lastMessage = time.Now()
+			irc.setLastMessageTime()
 			msg = msg[:len(msg)-2] //Remove \r\n
 			event := &Event{Raw: msg, Connection: irc}
 			var tagString string
@@ -171,8 +171,10 @@ func (irc *Connection) pingLoop() {
 	for {
 		select {
 		case <-ticker.C:
+
 			//Ping if we haven't received anything from the server within the keep alive period
-			if time.Since(irc.lastMessage) >= irc.KeepAlive {
+			lastMessageTime := irc.getLastMessageTime()
+			if time.Since(lastMessageTime) >= irc.KeepAlive {
 				irc.SendRawf("PING %d", time.Now().UnixNano())
 			}
 		case <-ticker2.C:
@@ -189,6 +191,17 @@ func (irc *Connection) pingLoop() {
 			return
 		}
 	}
+}
+func (irc *Connection) getLastMessageTime() time.Time {
+	irc.lock.Lock()
+	defer irc.lock.Unlock()
+	return irc.lastMessage
+}
+
+func (irc *Connection) setLastMessageTime() {
+	irc.lock.Lock()
+	defer irc.lock.Unlock()
+	irc.lastMessage = time.Now()
 }
 
 // Main loop to control the connection.

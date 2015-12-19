@@ -37,6 +37,7 @@ type Connection struct {
 	events      map[string]map[string]func(*Event)
 
 	lastMessage time.Time
+	lock        sync.RWMutex
 
 	VerboseCallbackHandler bool
 	Log                    *log.Logger
